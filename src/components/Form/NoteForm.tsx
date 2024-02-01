@@ -3,19 +3,30 @@ import { Button, Col, Form, Row, Stack } from "react-bootstrap";
 import ReactSelect from "react-select/creatable";
 import { CreateNoteProps } from "./CreateNote";
 import { Tag } from "../../types";
+import { v4 } from "uuid";
+import { useNavigate } from "react-router-dom";
 
-const NoteForm = ({ onSubmit }: CreateNoteProps) => {
+const NoteForm = ({
+  onSubmit,
+  createTag,
+  availableTags,
+  markdown = "",
+  tags = [],
+  title = "",
+}: CreateNoteProps) => {
   const titleRef = useRef<HTMLInputElement>(null);
   const markdownRef = useRef<HTMLTextAreaElement>(null);
-  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<Tag[]>(tags);
+  const navigate = useNavigate();
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onSubmit({
       title: titleRef.current!.value,
       markdown: markdownRef.current!.value,
-      tags: [],
+      tags: selectedTags,
     });
+    navigate(-1);
   };
 
   return (
@@ -25,7 +36,12 @@ const NoteForm = ({ onSubmit }: CreateNoteProps) => {
           <Col>
             <Form.Group controlId="title">
               <Form.Label>Title</Form.Label>
-              <Form.Control ref={titleRef} required className="shadow" />
+              <Form.Control
+                defaultValue={title}
+                ref={titleRef}
+                required
+                className="shadow"
+              />
             </Form.Group>
           </Col>
           <Col>
@@ -36,16 +52,30 @@ const NoteForm = ({ onSubmit }: CreateNoteProps) => {
                   label: tag.label,
                   value: tag.id,
                 }))}
-                onChange={(tags) => {
+                onChange={(note_tags) =>
                   setSelectedTags(
-                    tags.map((tag) => ({
+                    note_tags.map((tag) => ({
                       label: tag.label,
                       id: tag.value,
                     }))
-                  );
-                }}
+                  )
+                }
                 isMulti
                 className="shadow"
+                // save to local when new tag is created
+                onCreateOption={(label) => {
+                  // define new object
+                  const newTag: Tag = { id: v4(), label };
+                  // save to local
+                  createTag(newTag);
+                  // update state
+                  setSelectedTags([...selectedTags, newTag]);
+                }}
+                // list previously created
+                options={availableTags.map((item) => ({
+                  label: item.label,
+                  value: item.id,
+                }))}
               />
             </Form.Group>
           </Col>
@@ -53,11 +83,21 @@ const NoteForm = ({ onSubmit }: CreateNoteProps) => {
         {/* content area */}
         <Form.Group controlId="markdown" className="my-4">
           <Form.Label>Content</Form.Label>
-          <Form.Control ref={markdownRef} as={"textarea"} required />
+          <Form.Control
+            defaultValue={markdown}
+            ref={markdownRef}
+            as={"textarea"}
+            required
+            style={{ minHeight: "300px" }}
+          />
         </Form.Group>
         <div className="d-flex justify-content-end gap-2">
           <Button type="submit">Save</Button>
-          <Button type="button" variant="secondary">
+          <Button
+            onClick={() => navigate(-1)}
+            type="button"
+            variant="secondary"
+          >
             Cancel
           </Button>
         </div>

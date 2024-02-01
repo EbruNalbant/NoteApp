@@ -1,10 +1,26 @@
+import { useOutletContext } from "react-router-dom";
+import { Note, NoteData, Tag } from "../../types";
 import NoteForm from "./NoteForm";
 
-const EditNote = () => {
+type EditPropsType = {
+  onSubmit: (id: string, data: NoteData) => void;
+  createTag: (tag: Tag) => void;
+  availableTags: Tag[];
+};
+
+const EditNote = ({ onSubmit, createTag, availableTags }: EditPropsType) => {
+  const props: Note = useOutletContext();
   return (
-    <div>
+    <div className="container py-5">
       <h1>Edit Note</h1>
-      <NoteForm />
+      <NoteForm
+        title={props.title}
+        markdown={props.markdown}
+        tags={props.tags}
+        onSubmit={(data) => onSubmit(props.id, data)}
+        createTag={createTag}
+        availableTags={availableTags}
+      />
     </div>
   );
 };
