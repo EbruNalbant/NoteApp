@@ -22,6 +22,7 @@ const NoteCard = ({ note }: CardType) => {
             <Stack
               direction="horizontal"
               className="justif-content-center flex-wrap"
+              gap={2}
             >
               {" "}
               {note.tags.map((tag) => (
